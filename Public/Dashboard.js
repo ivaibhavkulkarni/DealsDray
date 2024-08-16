@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display username on the dashboard
     const username = sessionStorage.getItem('username');
     if (username) {
-        document.getElementById('usernameDisplay').textContent = `Logged in as: ${username}`;
+        document.getElementById('usernameDisplay').textContent = `${username}`;
     } else {
         document.getElementById('usernameDisplay').textContent = 'Logged in as: Guest';
     }

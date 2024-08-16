@@ -34,6 +34,11 @@ const initializeDbandServer = async () =>{
 
 initializeDbandServer();
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+
 //API for posting a new user into t_login
 
 app.post("/register/",async (request,response) => {

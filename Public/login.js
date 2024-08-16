@@ -1,5 +1,3 @@
-// login.js
-
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('loginForm');
 
@@ -21,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.text();
 
             if (response.status === 200) {
+                sessionStorage.setItem('username', username); // Store the username
                 alert('Login Successful');
                 window.location.href = 'Dashboard.html';
             } else {
@@ -32,12 +31,3 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-
-
-if (response.status === 200) {
-    sessionStorage.setItem('username', username); // Store the username
-    alert('Login Successful');
-    window.location.href = 'Dashboard.html';
-} else {
-    alert(result);
-}
