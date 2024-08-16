@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link href="Dashboard.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav-background">
+        <div class="nav">
+            <div class="nav-left">
+                <img class="img" src="unnamed.png" alt="Logo">
+                <button class="dash-button">Home</button>
+                <button class="dash-button" id="employeeListButton">Employee List</button>
+                <button class="dash-button" id="addEmployeeButton">Add Employee</button>
+            </div>
+            <div class="nav-right">
+                <p id="usernameDisplay"></p>
+                <button class="logout-button" id="logoutButton">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Employee Section -->
+    <div id="employee-section" class="employee-section" style="display: none;">
+        <h2>Total Count of Employees: <span id="employee-count">0</span></h2>
+        
+        <input type="text" id="search-bar" placeholder="Search by action" class="search-bar">
+        
+        <table id="employee-table" class="employee-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Image</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Mobile</th>
+                    <th>Designation</th>
+                    <th>Gender</th>
+                    <th>Course</th>
+                    <th>Create Date</th>
+                </tr>
+            </thead>
+            <tbody id="employee-list">
+                <!-- Employee rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Form for Adding/Updating Employees -->
+    <div id="employee-form" class="employee-form" style="display: none;">
+        <h2>Add or Update Employee</h2>
+        <form id="employeeForm">
+            <input type="text" id="f_Id" placeholder="Employee ID">
+            <input type="text" id="f_Image" placeholder="Image URL">
+            <input type="text" id="f_Name" placeholder="Name">
+            <input type="email" id="f_Email" placeholder="Email">
+            <input type="text" id="f_Mobile" placeholder="Mobile">
+            <input type="text" id="f_Designation" placeholder="Designation">
+            <label>Gender:</label>
+            <input type="radio" name="gender" value="Male"> Male
+            <input type="radio" name="gender" value="Female"> Female
+            <input type="text" id="f_Course" placeholder="Course">
+            <input type="date" id="f_Createdate" placeholder="Create Date">
+            <button type="submit">Save Employee</button>
+            <button type="button" id="cancelButton">Cancel</button>
+        </form>
+    </div>
+
+    <script src="Dashboard.js"></script>
+</body>
+</html>

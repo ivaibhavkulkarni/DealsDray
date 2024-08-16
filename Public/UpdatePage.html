@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update</title>
+    <link href="Update.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="nav-background">
+        <div class="nav">
+            <div class="nav-left">
+                <img class="img" src="unnamed.png" alt="Logo">
+                <button class="dash-button">Home</button>
+                <button class="dash-button" onclick="employeeList()">Employee List</button>
+            </div>
+            <div class="nav-right">
+                <p id="usernameDisplay">User name</p> <!-- Added id -->
+                <button class="logout-button" id="logoutButton">Logout</button>
+            </div>
+        </div>
+    </nav>
+    <div class="form-container">
+        <form>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name">
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="text" id="email">
+            </div>
+            <div class="form-group">
+                <label for="mobile">Mobile</label>
+                <input type="text" id="mobile">
+            </div>
+            <div class="form-group">
+                <label for="designation">Designation</label>
+                <select name="designation" id="designation">
+                    <option value="HR">HR</option>
+                    <option value="Sales">Sales</option>
+                    <option value="Manager">Manager</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <div class="radio-group">
+                    <label>
+                        <input type="radio" name="gender" value="male"> Male
+                    </label>
+                    <label>
+                        <input type="radio" name="gender" value="female"> Female
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Course</label>
+                <div class="checkbox-group">
+                    <label>
+                        <input type="checkbox" name="course" value="MCA"> MCA
+                    </label>
+                    <label>
+                        <input type="checkbox" name="course" value="BCA"> BCA
+                    </label>
+                    <label>
+                        <input type="checkbox" name="course" value="BSc"> BSc
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="image">Image Upload</label>
+                <input type="file" id="image">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="button">Submit</button>
+            </div>
+        </form>
+    </div>
+    <script src="updatepage.js"></script>
+</body>
+</html>
