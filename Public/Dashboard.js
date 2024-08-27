@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display username on the dashboard
     const username = sessionStorage.getItem('username');
     if (username) {
-        document.getElementById('usernameDisplay').textContent = `${username}`;
+        document.getElementById('usernameDisplay').textContent = `Welcome :${username}`;
     } else {
         document.getElementById('usernameDisplay').textContent = 'Logged in as: Guest';
     }
@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${employee.f_Createdate}</td>
                     <td>
                         <button class="edit-button" data-id="${employee.f_Id}">Edit</button>
-                        <button class="delete-button" data-id="${employee.f_Id}">Delete</button>
-                    </td> <!-- Edit and Delete buttons -->
+                        <button class="delete-button" data-email="${employee.f_Email}">Delete</button>
+                    </td>
                 `;
                 tbody.appendChild(row);
             });
@@ -81,10 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle delete button clicks
     document.getElementById('employee-table').addEventListener('click', async function(event) {
         if (event.target && event.target.classList.contains('delete-button')) {
-            const employeeId = event.target.getAttribute('data-id');
+            const employeeEmail = event.target.getAttribute('data-email'); // Get the email from data attribute
             if (confirm('Are you sure you want to delete this employee?')) {
                 try {
-                    const response = await fetch(`http://localhost:3000/employees/${employeeId}`, {
+                    const response = await fetch(`http://localhost:3000/employees/${employeeEmail}`, {
                         method: 'DELETE'
                     });
                     
