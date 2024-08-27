@@ -45,11 +45,16 @@ const authenticationToken = (request, response, next) => {
         if (error) {
             response.status(401).send('Invalid JWT Token');
         } else {
-            request.user = payload;
-            next();
+            if (payload.role !== 'admin') {
+                response.status(403).send('Access Forbidden');
+            } else {
+                request.user = payload;
+                next();
+            }
         }
     });
 };
+
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
