@@ -3,10 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const username = sessionStorage.getItem('username');
     if (username) {
         document.getElementById('usernameDisplay').textContent = `Welcome :${username}`;
-    } else {
-        document.getElementById('usernameDisplay').textContent = 'Logged in as: Guest';
-    }
-
+    } 
     // Handle logout button click
     document.getElementById('logoutButton').addEventListener('click', function() {
         sessionStorage.clear(); // Clear session storage on logout
@@ -110,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('employee-table').addEventListener('click', function(event) {
         if (event.target && event.target.classList.contains('edit-button')) {
             const employeeId = event.target.getAttribute('data-id');
-            window.location.href = `updatepage.html?id=${employeeId}`; // Redirect to update page with employee ID
+            window.location.href = `updatepage.html?id=${employeeId}`; 
         }
     });
 });

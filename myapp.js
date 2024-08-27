@@ -32,6 +32,25 @@ const initializeDbandServer = async () => {
 
 initializeDbandServer();
 
+// Middleware for JWT token authentication
+const authenticationToken = (request, response, next) => {
+    const authHeader = request.headers['authorization'];
+    if (authHeader === undefined) {
+        response.status(401).send('Invalid JWT Token');
+        return;
+    }
+
+    const jwtToken = authHeader.split(' ')[1];
+    jwt.verify(jwtToken, 'My_SECRET_KEY', (error, payload) => {
+        if (error) {
+            response.status(401).send('Invalid JWT Token');
+        } else {
+            request.user = payload;
+            next();
+        }
+    });
+};
+
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
@@ -63,7 +82,10 @@ app.post("/login/", async (request, response) => {
     } else {
         const isPasswordValid = await bcrypt.compare(password, userPresent.f_Pwd);
         if (isPasswordValid) {
-            response.send("Login Successful");
+            const payload = {username: userPresent.f_userName};
+            const jwtToken = jwt.sign(payload, 'My_SECRET_KEY', { expiresIn: '1h' });
+            response.send({ jwtToken });
+            console.log({ jwtToken });
         } else {
             response.status(400).send("Incorrect Password");
         }
@@ -71,14 +93,14 @@ app.post("/login/", async (request, response) => {
 });
 
 // API to get all employees
-app.get('/employees', async (req, res) => {
+app.get('/employees', authenticationToken, async (req, res) => {
     const sqlQuery = 'SELECT * FROM t_Employee;';
     const data = await db.all(sqlQuery);
     res.send(data);
 });
 
 // API to insert data into employee
-app.post('/employees', upload.single('f_Image'), async (req, res) => {
+app.post('/employees', authenticationToken, upload.single('f_Image'), async (req, res) => {
     try {
         const { f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course } = req.body;
         const f_Image = req.file ? req.file.buffer : null; // Assuming the image is processed as a buffer
@@ -95,7 +117,7 @@ app.post('/employees', upload.single('f_Image'), async (req, res) => {
 });
 
 // API for deleting the Employee from the database
-app.delete("/employees/:Email", async (request, response) => {
+app.delete("/employees/:Email", authenticationToken, async (request, response) => {
     const { Email } = request.params;
     try {
         const deleteQuery = `DELETE FROM t_Employee WHERE f_Email = ?;`;
@@ -105,4 +127,9 @@ app.delete("/employees/:Email", async (request, response) => {
         console.error("Error deleting employee:", error.message);
         response.status(500).send("Error deleting employee");
     }
+});
+
+// API to serve the Dashboard page
+app.get('/dashboard', authenticationToken, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'Dashboard.html'));
 });
