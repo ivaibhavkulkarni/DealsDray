@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Display username on the dashboard
     const username = sessionStorage.getItem('username');
     if (username) {
-        document.getElementById('usernameDisplay').textContent = `Welcome : ${username}`;
+        document.getElementById('usernameDisplay').textContent = `Welcome: ${username}`;
     } else {
         window.location.href = 'login.html'; // Redirect to login page if no username
     }
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Handle Add Employee button click
     document.getElementById('addEmployeeButton').addEventListener('click', function() {
-        window.location.href = 'updatepage.html'; // Redirect to the update page
+        window.location.href = 'updatepage.html'; // Redirect to the add/update page
     });
 
     // Handle delete button clicks
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('employee-table').addEventListener('click', function(event) {
         if (event.target && event.target.classList.contains('edit-button')) {
             const employeeId = event.target.getAttribute('data-id');
-            window.location.href = `updatepage.html?id=${employeeId}`; 
+            window.location.href = `edit.html?id=${employeeId}`; 
         }
     });
 });

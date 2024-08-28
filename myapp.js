@@ -24,7 +24,6 @@ const initializeDbandServer = async () => {
             driver: sqlite3.Database
         });
 
-        // Ensure the t_Employee table exists
         await db.exec(`
             CREATE TABLE IF NOT EXISTS t_Employee (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -78,7 +77,7 @@ app.post("/login/", async (request, response) => {
     if (user === undefined) {
         response.status(400).send("Invalid User");
     } else {
-        const isPasswordValid = await bcrypt.compare(password, user.f_Pwd); // Ensure bcrypt is correctly imported and used
+        const isPasswordValid = await bcrypt.compare(password, user.f_Pwd);
         if (isPasswordValid) {
             response.send("Login successful");
         } else {
@@ -96,7 +95,6 @@ app.get('/employees', async (req, res) => {
         const sqlQuery = 'SELECT * FROM t_Employee;';
         const data = await db.all(sqlQuery);
 
-        // Convert image data to Base64
         const employeesWithImages = data.map(employee => {
             return {
                 ...employee,
@@ -178,7 +176,7 @@ app.get('/employee/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        // Use parameterized query to prevent SQL injection
+        // Adjusted query with the correct column names
         const query = 'SELECT f_Id, f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course FROM t_Employee WHERE f_Id = ?';
         const user = await db.get(query, [id]);
 
@@ -193,29 +191,24 @@ app.get('/employee/:id', async (req, res) => {
     }
 });
 
-
-
-
-
-app.put('/employees/id/:id', async (req, res) => {
-    const employeeId = req.params.id;
-    const { f_Name, f_Mobile, f_Designation, f_gender, f_Course } = req.body;
-
-    // Handle image update separately if needed
-    let f_Image = null;
-    if (req.file) {
-        f_Image = req.file.buffer;
-    }
-
-    const sql = `UPDATE t_Employee
-                 SET f_Name = ?, f_Mobile = ?, f_Designation = ?, f_gender = ?, f_Course = ?, f_Image = ?
-                 WHERE f_Id = ?`;
+app.put('/employees/:id', upload.single('f_Image'), async (req, res) => {
+    console.log('Request body:', req.body);
+    console.log('File:', req.file);
 
     try {
-        await db.run(sql, [f_Name, f_Mobile, f_Designation, f_gender, f_Course, f_Image, employeeId]);
-        res.status(200).json({ message: 'Employee updated successfully' });
+        const { id } = req.params;
+        const { f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course } = req.body;
+        const f_Image = req.file ? req.file.buffer : null;
+
+        // Updated SQL query with correct column name `f_Id`
+        const updateQuery = `UPDATE t_Employee 
+                             SET f_Image = ?, f_Name = ?, f_Email = ?, f_Mobile = ?, f_Designation = ?, f_gender = ?, f_Course = ? 
+                             WHERE f_Id = ?;`;
+
+        await db.run(updateQuery, [f_Image, f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course, id]);
+        res.status(200).send("Employee updated successfully");
     } catch (err) {
-        console.error('Error updating employee:', err.message);
-        res.status(500).json({ error: err.message });
+        console.error("Error updating employee:", err.message);
+        res.status(500).send("Error updating employee");
     }
 });
