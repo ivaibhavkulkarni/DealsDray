@@ -173,3 +173,49 @@ app.get('/employees/:email', async (req, res) => {
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Dashboard.html'));
 });
+
+app.get('/employee/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // Use parameterized query to prevent SQL injection
+        const query = 'SELECT f_Id, f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course FROM t_Employee WHERE f_Id = ?';
+        const user = await db.get(query, [id]);
+
+        if (user) {
+            res.json(user);
+        } else {
+            res.status(404).send('Employee not found');
+        }
+    } catch (err) {
+        console.error('Error fetching employee:', err.message);
+        res.status(500).send('Error fetching employee');
+    }
+});
+
+
+
+
+
+app.put('/employees/id/:id', async (req, res) => {
+    const employeeId = req.params.id;
+    const { f_Name, f_Mobile, f_Designation, f_gender, f_Course } = req.body;
+
+    // Handle image update separately if needed
+    let f_Image = null;
+    if (req.file) {
+        f_Image = req.file.buffer;
+    }
+
+    const sql = `UPDATE t_Employee
+                 SET f_Name = ?, f_Mobile = ?, f_Designation = ?, f_gender = ?, f_Course = ?, f_Image = ?
+                 WHERE f_Id = ?`;
+
+    try {
+        await db.run(sql, [f_Name, f_Mobile, f_Designation, f_gender, f_Course, f_Image, employeeId]);
+        res.status(200).json({ message: 'Employee updated successfully' });
+    } catch (err) {
+        console.error('Error updating employee:', err.message);
+        res.status(500).json({ error: err.message });
+    }
+});
