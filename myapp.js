@@ -3,25 +3,41 @@ const app = express();
 const sqlite3 = require("sqlite3");
 const { open } = require("sqlite");
 const path = require("path");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
 const cors = require("cors");
 const multer = require("multer");
+const bcrypt = require("bcrypt");
 const upload = multer({ storage: multer.memoryStorage() });
 
 let db = null;
 app.use(express.json());
 app.use(cors());
 
+// Path to SQLite database
 const dbpath = path.join(__dirname, "dataBase.db");
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Initialize database and server
 const initializeDbandServer = async () => {
     try {
         db = await open({
             filename: dbpath,
             driver: sqlite3.Database
         });
+
+        // Ensure the t_Employee table exists
+        await db.exec(`
+            CREATE TABLE IF NOT EXISTS t_Employee (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                f_Image BLOB,
+                f_Name TEXT,
+                f_Email TEXT,
+                f_Mobile TEXT,
+                f_Designation TEXT,
+                f_gender TEXT,
+                f_Course TEXT
+            );
+        `);
+
         app.listen(3000, () => {
             console.log("Server Running at http://localhost:3000");
         });
@@ -32,58 +48,74 @@ const initializeDbandServer = async () => {
 
 initializeDbandServer();
 
-
-
+// Serve the login page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// API for posting a new user into t_login
+// Register a new user
 app.post("/register/", async (request, response) => {
     const { username, password } = request.body;
-    const userExisitsInDB = `SELECT * FROM t_login WHERE f_userName = ?;`;
-    const user = await db.get(userExisitsInDB, [username]);
+    const userExistsQuery = `SELECT * FROM t_login WHERE f_userName = ?;`;
+    const user = await db.get(userExistsQuery, [username]);
     const hashedPassword = await bcrypt.hash(password, 10);
 
     if (user === undefined) {
-        const postingNewUserIntoTable = `INSERT INTO t_login (f_userName, f_Pwd) VALUES (?, ?);`;
-        await db.run(postingNewUserIntoTable, [username, hashedPassword]);
+        const insertUserQuery = `INSERT INTO t_login (f_userName, f_Pwd) VALUES (?, ?);`;
+        await db.run(insertUserQuery, [username, hashedPassword]);
         response.status(200).send("User created successfully!");
     } else {
         response.status(400).send("User Already Exists.");
     }
 });
 
-// API for login already existing user
+// Login an existing user
 app.post("/login/", async (request, response) => {
     const { username, password } = request.body;
-    const userPresntInTable = `SELECT * FROM t_login WHERE f_userName = ?;`;
-    const userPresent = await db.get(userPresntInTable, [username]);
+    const userQuery = `SELECT * FROM t_login WHERE f_userName = ?;`;
+    const user = await db.get(userQuery, [username]);
 
-    if (userPresent === undefined) {
+    if (user === undefined) {
         response.status(400).send("Invalid User");
     } else {
-        const isPasswordValid = await bcrypt.compare(password, userPresent.f_Pwd);
+        const isPasswordValid = await bcrypt.compare(password, user.f_Pwd); // Ensure bcrypt is correctly imported and used
         if (isPasswordValid) {
-            response.send("Login done")
+            response.send("Login successful");
         } else {
             response.status(400).send("Incorrect Password");
         }
     }
 });
 
-// API to get all employees
+
+
+
+// Get all employees
 app.get('/employees', async (req, res) => {
-    const sqlQuery = 'SELECT * FROM t_Employee;';
-    const data = await db.all(sqlQuery);
-    res.send(data);
+    try {
+        const sqlQuery = 'SELECT * FROM t_Employee;';
+        const data = await db.all(sqlQuery);
+
+        // Convert image data to Base64
+        const employeesWithImages = data.map(employee => {
+            return {
+                ...employee,
+                f_Image: employee.f_Image ? `data:image/jpeg;base64,${employee.f_Image.toString('base64')}` : null
+            };
+        });
+
+        res.json(employeesWithImages);
+    } catch (error) {
+        console.error("Error fetching employees:", error.message);
+        res.status(500).send("Error fetching employee data");
+    }
 });
 
-// API to insert data into employee
-app.post('/employees',upload.single('f_Image'), async (req, res) => {
+
+app.post('/employees', upload.single('f_Image'), async (req, res) => {
     try {
         const { f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course } = req.body;
-        const f_Image = req.file ? req.file.buffer : null; // Assuming the image is processed as a buffer
+        const f_Image = req.file ? req.file.buffer : null;
 
         const insertQuery = `INSERT INTO t_Employee (f_Image, f_Name, f_Email, f_Mobile, f_Designation, f_gender, f_Course) 
                              VALUES (?, ?, ?, ?, ?, ?, ?);`;
@@ -96,7 +128,8 @@ app.post('/employees',upload.single('f_Image'), async (req, res) => {
     }
 });
 
-// API for deleting the Employee from the database
+
+// Delete an employee by email
 app.delete("/employees/:Email", async (request, response) => {
     const { Email } = request.params;
     try {
@@ -109,7 +142,34 @@ app.delete("/employees/:Email", async (request, response) => {
     }
 });
 
-// API to serve the Dashboard page
+// Get employee details by email
+app.get('/employees/:email', async (req, res) => {
+    try {
+        const { email } = req.params;
+        const sqlQuery = `SELECT * FROM t_Employee WHERE f_Email = ?;`;
+        const employee = await db.get(sqlQuery, [email]);
+
+        if (employee) {
+            res.json({
+                id: employee.id,
+                name: employee.f_Name,
+                email: employee.f_Email,
+                mobile: employee.f_Mobile,
+                designation: employee.f_Designation,
+                gender: employee.f_gender,
+                course: employee.f_Course,
+                image: employee.f_Image ? `data:image/jpeg;base64,${employee.f_Image.toString('base64')}` : null
+            });
+        } else {
+            res.status(404).send('Employee not found');
+        }
+    } catch (err) {
+        console.error("Error fetching employee details:", err.message);
+        res.status(500).send("Error fetching employee details");
+    }
+});
+
+// Serve the dashboard page
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'Dashboard.html'));
 });
